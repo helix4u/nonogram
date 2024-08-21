@@ -40,13 +40,17 @@ def validate_nonogram(grid, row_clues, column_clues):
             return False
     return True
 
-def display_nonogram(grid, row_clues, column_clues):
+def display_nonogram(grid, row_clues, column_clues, empty=False):
     # Calculate the maximum number of digits required for any clue
     max_clue_digit_len = max(max(len(str(num)) for num in clue) for clue in row_clues + column_clues)
     
     # Anticipate up to 4-digit clues, adjust format accordingly
     cell_width = max(max_clue_digit_len, 4)  # Ensure cell_width is at least 4
     format_str = f"{{:>{cell_width}}}"
+
+    # Square character
+    filled_square = "■"
+    empty_square = "□"
 
     # Calculate the maximum number of clues in any row or column
     max_row_clue_len = max(len(clue) for clue in row_clues)
@@ -68,7 +72,7 @@ def display_nonogram(grid, row_clues, column_clues):
     for row_clue, row in zip(row_clues, grid):
         # Align row clues and grid cells
         row_clue_str = " " + "".join(format_str.format(clue) for clue in row_clue).rjust(max_row_clue_len * cell_width)
-        grid_row_str = "".join(format_str.format("#" if cell else ".") for cell in row)
+        grid_row_str = "".join(format_str.format(filled_square if cell else empty_square) if not empty else format_str.format(empty_square) for cell in row)
         print(f"{row_clue_str} | {grid_row_str}")
 
 # Example usage
@@ -76,7 +80,12 @@ height, width = 10, 10
 grid, row_clues, column_clues = generate_nonogram(height, width, density=0.5)
 
 if validate_nonogram(grid, row_clues, column_clues):
-    print("Generated nonogram is valid!")
+    print("Generated nonogram is valid!\n")
+    
+    print("Solved Nonogram:\n")
     display_nonogram(grid, row_clues, column_clues)
+    
+    print("\nBlank Nonogram (for printing):\n")
+    display_nonogram(grid, row_clues, column_clues, empty=True)
 else:
     print("Generated nonogram is invalid.")
