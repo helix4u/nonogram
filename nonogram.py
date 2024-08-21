@@ -41,21 +41,21 @@ def validate_nonogram(grid, row_clues, column_clues):
     return True
 
 def display_nonogram(grid, row_clues, column_clues):
-    # Get the maximum length of the clues
+    # Calculate the maximum number of digits required for any clue
+    max_clue_digit_len = max(max(len(str(num)) for num in clue) for clue in row_clues + column_clues)
+    
+    # Anticipate up to 4-digit clues, adjust format accordingly
+    cell_width = max(max_clue_digit_len, 4)  # Ensure cell_width is at least 4
+    format_str = f"{{:>{cell_width}}}"
+
+    # Calculate the maximum number of clues in any row or column
     max_row_clue_len = max(len(clue) for clue in row_clues)
     max_col_clue_len = max(len(clue) for clue in column_clues)
 
-    # Determine the padding based on the maximum length of the clues
-    max_clue_len = max(max_row_clue_len, max_col_clue_len)
-
-    # Create a format string based on the maximum clue length
-    cell_width = 3  # Adjust this width for better alignment
-    format_str = f"{{:>{cell_width}}}"
-
-    # Print column clues with appropriate padding
+    # Print column clues with appropriate padding and offset by one space
     for i in range(max_col_clue_len):
-        # Start with padding for the row clues
-        print(" " * (max_clue_len * cell_width), end=" ")
+        # Padding for row clues with one additional space
+        print(" " * ((max_row_clue_len * cell_width) + 3), end=" ")
         for clue in column_clues:
             # Print the clue if it exists, else print an empty space
             if len(clue) > i:
@@ -64,11 +64,10 @@ def display_nonogram(grid, row_clues, column_clues):
                 print(" " * cell_width, end="")
         print()
 
-    # Print each row with its clues
+    # Print each row with its clues, offsetting by one space
     for row_clue, row in zip(row_clues, grid):
-        # Pad row clues to align with the grid
-        row_clue_str = "".join(format_str.format(clue) for clue in row_clue).rjust(max_clue_len+2 * cell_width)
-        # Then print the grid cells
+        # Align row clues and grid cells
+        row_clue_str = " " + "".join(format_str.format(clue) for clue in row_clue).rjust(max_row_clue_len * cell_width)
         grid_row_str = "".join(format_str.format("#" if cell else ".") for cell in row)
         print(f"{row_clue_str} | {grid_row_str}")
 
