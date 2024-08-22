@@ -12,7 +12,7 @@ from kivy.properties import NumericProperty
 from kivy.core.window import Window
 import random
 
-Window.size = (850, 512)
+Window.size = (1024, 768)
 
 # Core Nonogram logic
 def generate_structured_grid(height, width, density=0.5):
@@ -77,84 +77,118 @@ class NonogramApp(App):
     def build(self):
         self.grid_height = 10
         self.grid_width = 10
-        self.layout = BoxLayout(orientation='vertical')
         
-        # Initialize the grid layout and generate the first Nonogram
-        self.grid_layout = None
-        self.solution_grid = None
-        self.generate_nonogram()
+        # Main layout with vertical orientation
+        main_layout = BoxLayout(orientation='vertical', padding=20, spacing=20)
         
-        # Add button for generating new Nonogram
+        # ScrollView containing the Grid layout (this should be at the top)
+        self.scroll_view = ScrollView(size_hint=(1, 0.6))
+        self.grid_layout = GridLayout(cols=self.grid_width + 1, rows=self.grid_height + 1, padding=10, spacing=5, size_hint=(None, None))
+        self.scroll_view.add_widget(self.grid_layout)
+        main_layout.add_widget(self.scroll_view)
+        
+        # Persistent result label (directly below the grid)
+        self.result_label = Label(text="Correctly shaded cells: 0 / 0 | Incorrectly shaded cells: 0", size_hint=(1, 0.1), height=40)
+        main_layout.add_widget(self.result_label)
+        
+        # Add button for generating new Nonogram (below the result label)
         generate_button = Button(text='Generate New Nonogram', size_hint=(1, 0.1), height=50)
         generate_button.bind(on_press=self.generate_nonogram)
-        self.layout.add_widget(generate_button)
+        main_layout.add_widget(generate_button)
         
-        # Add button for checking progress
+        # Add button for checking progress at the bottom
         check_button = Button(text='Check Progress', size_hint=(1, 0.1), height=50)
         check_button.bind(on_press=self.check_progress)
-        self.layout.add_widget(check_button)
+        main_layout.add_widget(check_button)
 
-        return self.layout
+        # Calculate initial cell size and store it
+        self.calculate_initial_cell_size()
+
+        # Generate the initial Nonogram
+        self.generate_nonogram()
+
+        return main_layout
+
+    def calculate_initial_cell_size(self):
+        """Calculate and store the initial cell size based on the available window size."""
+        # Calculate available height for the grid
+        available_height = Window.height - (self.result_label.height + 100)  # 100 for padding around the label and buttons
+        
+        max_row_clues_len = 4  # Assuming max length of clues (this can be adjusted)
+        max_col_clues_len = 4  # Assuming max length of clues (this can be adjusted)
+        
+        # Calculate the cell size based on the initial window size
+        self.cell_size = min(Window.width // (self.grid_width + max_row_clues_len + 2), 
+                             available_height // (self.grid_height + max_col_clues_len + 2))
 
     def generate_nonogram(self, *args):
-        if self.grid_layout:
-            self.layout.remove_widget(self.grid_layout)
-        
+        # Clear grid before generating a new one
+        self.grid_layout.clear_widgets()
+
+        # Generate the grid and clues
         grid, row_clues, column_clues = generate_nonogram(self.grid_height, self.grid_width, density=0.5)
         self.solution_grid = grid  # Store the correct solution grid
-        
+
         max_row_clues_len = max(len(clue) for clue in row_clues)
         max_col_clues_len = max(len(clue) for clue in column_clues)
-        
-        cell_size = min(Window.width // (self.grid_width + max_row_clues_len + 2), 
-                        (Window.height * 0.7) // (self.grid_height + max_col_clues_len + 2))
 
-        self.grid_layout = GridLayout(cols=self.grid_width + max_row_clues_len, 
-                                      rows=max_col_clues_len + self.grid_height, 
-                                      size_hint=(None, None), spacing=2)
-        self.grid_layout.bind(minimum_height=self.grid_layout.setter('height'))
-        self.grid_layout.size = (Window.width, Window.height * 0.7)
+        # Ensure that the grid has the correct number of rows and columns
+        self.grid_layout.cols = self.grid_width + max_row_clues_len
+        self.grid_layout.rows = self.grid_height + max_col_clues_len
 
-        # Add empty rows for column hints
+        # Add column clues with increased spacing
         for i in range(max_col_clues_len):
             for j in range(max_row_clues_len):
                 self.grid_layout.add_widget(Label(text=""))
             for clue in column_clues:
                 if i < max_col_clues_len - len(clue):
-                    self.grid_layout.add_widget(Label(text="", size_hint_y=None, height=cell_size // 2))  # Adjusted vertical space
+                    self.grid_layout.add_widget(Label(text="", size_hint_y=None, height=self.cell_size // 2))  # Adjusted vertical space
                 else:
-                    self.grid_layout.add_widget(Label(text=str(clue[i - (max_col_clues_len - len(clue))]), font_size='14sp', size_hint_y=None, height=cell_size // 2))
+                    # Increased spacing between numbers
+                    self.grid_layout.add_widget(Label(text=str(clue[i - (max_col_clues_len - len(clue))]), font_size='14sp', size_hint_y=None, height=self.cell_size // 2, padding=(15, 15)))
 
-        # Add row clues and grid cells
+        # Add row clues and grid cells with increased spacing
         self.cells = []  # Store references to the cells for checking progress
         for i, row in enumerate(grid):
             for j in range(max_row_clues_len):
                 if j < max_row_clues_len - len(row_clues[i]):
                     self.grid_layout.add_widget(Label(text=""))
                 else:
-                    self.grid_layout.add_widget(Label(text=str(row_clues[i][j - (max_row_clues_len - len(row_clues[i]))]), font_size='14sp', size_hint_y=None, height=cell_size))
+                    # Increased spacing between numbers
+                    self.grid_layout.add_widget(Label(text=str(row_clues[i][j - (max_row_clues_len - len(row_clues[i]))]), font_size='14sp', size_hint_y=None, height=self.cell_size, padding=(15, 15)))
 
             for cell in row:
-                nonogram_cell = NonogramCell(size_hint=(None, None), size=(cell_size, cell_size))
+                nonogram_cell = NonogramCell(size_hint=(None, None), size=(self.cell_size, self.cell_size))
                 self.cells.append(nonogram_cell)
                 self.grid_layout.add_widget(nonogram_cell)
         
-        self.layout.add_widget(self.grid_layout, index=0)
+        # Reset the result label
+        self.result_label.text = "Correctly shaded cells: 0 / 0 | Incorrectly shaded cells: 0"
+
+        # Update grid layout size
+        self.grid_layout.size = (self.grid_width * self.cell_size + max_row_clues_len * self.cell_size, 
+                                 self.grid_height * self.cell_size + max_col_clues_len * self.cell_size)
 
     def check_progress(self, *args):
         correct_count = 0
+        incorrect_count = 0
         total_correct = sum(sum(row) for row in self.solution_grid)  # Total number of correct shaded cells
         
         for i, cell in enumerate(self.cells):
             row = i // self.grid_width
             col = i % self.grid_width
-            if self.solution_grid[row][col] == 1 and cell.cell_state == 1:
-                correct_count += 1
+            if self.solution_grid[row][col] == 1:
+                if cell.cell_state == 1:
+                    correct_count += 1
+                elif cell.cell_state == 0:
+                    pass  # Unshaded and should be unshaded, so do nothing
+                else:
+                    incorrect_count += 1  # X-ed or shaded when it shouldn't be
+            elif cell.cell_state == 1:
+                incorrect_count += 1  # Shaded when it should be unshaded
 
-        # Display result to the user
-        result_text = f"Correctly shaded cells: {correct_count} / {total_correct}"
-        result_label = Label(text=result_text, size_hint=(1, 0.1), height=50)
-        self.layout.add_widget(result_label, index=1)
+        # Update result label with the latest count
+        self.result_label.text = f"Correctly shaded cells: {correct_count} / {total_correct} | Incorrectly shaded cells: {incorrect_count}"
 
 if __name__ == '__main__':
     NonogramApp().run()
