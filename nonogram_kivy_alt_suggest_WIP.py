@@ -11,7 +11,7 @@ from kivy.properties import NumericProperty
 from kivy.core.window import Window
 import random
 
-Window.size = (512, 768)
+Window.size = (420, 768)
 
 # Core Nonogram logic
 def generate_structured_grid(height, width, density=0.5):
