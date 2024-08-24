@@ -11,8 +11,6 @@ from kivy.properties import NumericProperty
 from kivy.core.window import Window
 import random
 
-Window.size = (420, 768)
-
 # Core Nonogram logic
 def generate_structured_grid(height, width, density=0.5):
     grid = [[0 for _ in range(width)] for _ in range(height)]
@@ -92,6 +90,10 @@ class NonogramApp(App):
         self.grid_height = 10
         self.grid_width = 10
         
+        # Get screen size at runtime
+        self.screen_width = Window.width
+        self.screen_height = Window.height
+        
         # Main layout with vertical orientation
         main_layout = BoxLayout(orientation='vertical', padding=20, spacing=20)
         
@@ -100,7 +102,16 @@ class NonogramApp(App):
         main_layout.add_widget(self.grid_layout)
         
         # Persistent result label (directly below the grid)
-        self.result_label = Label(text="Correctly shaded cells: 0 / 0 | Incorrectly shaded cells: 0", size_hint=(1, 0.1), height=40)
+        self.result_label = Label(
+            text="Correctly shaded cells: 0 / 0 | Incorrectly shaded cells: 0",
+            size_hint=(1, None),  # Adjust the height based on content
+            height=120,  # Increased height to allow for more padding
+            text_size=(Window.width - 40, None),  # Adjust width to fit screen size, considering padding
+            halign='left',  # Align text to the left
+            valign='middle',  # Center text vertically
+            padding_y=20  # Increased vertical padding to avoid overlap
+        )
+        self.result_label.bind(size=self.result_label.setter('text_size'))  # Ensure text wraps properly
         main_layout.add_widget(self.result_label)
         
         # Add button for generating new Nonogram (below the result label)
@@ -134,8 +145,8 @@ class NonogramApp(App):
         max_row_clues_len = max(len(clue) for clue in row_clues)
         max_col_clues_len = max(len(clue) for clue in column_clues)
         
-        cell_size = min(Window.width // (self.grid_width + max_row_clues_len + 2), 
-                        (Window.height * 0.7) // (self.grid_height + max_col_clues_len + 2))
+        cell_size = min(self.screen_width // (self.grid_width + max_row_clues_len + 2), 
+                        (self.screen_height * 0.7) // (self.grid_height + max_col_clues_len + 2))
 
         # Ensure that the grid has the correct number of rows and columns
         self.grid_layout.cols = self.grid_width + max_row_clues_len
