@@ -51,6 +51,11 @@ python nonogram_kivy_WIP.py
 
 #### Alternative Suggestion Kivy App:
 
+This one is modified to work with Pydroid 3 on android. Tested on a Galaxt S23 Ultra. Functional, not pretty. ![image](https://github.com/user-attachments/assets/5840f8f8-6d1b-4eed-a0e7-5d43dd69cd3e)
+
+
+
+
 ```bash
 python nonogram_kivy_alt_suggest_WIP.py
 ```
