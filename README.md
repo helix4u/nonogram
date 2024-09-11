@@ -1,4 +1,4 @@
-# Nonogram Generator/Solver
+# Nonogram Generator & Friends
 ![image](https://github.com/user-attachments/assets/70f5aa32-1300-4dfc-9ac3-7a19f64b9efc)
 
 This repository contains a collection of Python scripts and Kivy applications for generating, playing, and solving Nonograms and other puzzle games. It’s a work in progress, so expect bugs—feel free to break things, fix them, and repeat the process.
