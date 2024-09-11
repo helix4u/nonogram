@@ -1,7 +1,7 @@
-# Nonogram Generator and Solver
+# Nonogram Generator/Solver
 ![image](https://github.com/user-attachments/assets/70f5aa32-1300-4dfc-9ac3-7a19f64b9efc)
 
-This repository contains a collection of Python scripts and Kivy applications for generating, playing, and solving Nonograms. It’s a work in progress, so expect bugs—feel free to break things, fix them, and repeat the process.
+This repository contains a collection of Python scripts and Kivy applications for generating, playing, and solving Nonograms and other puzzle games. It’s a work in progress, so expect bugs—feel free to break things, fix them, and repeat the process.
 
 ## Prerequisites
 
@@ -57,6 +57,14 @@ This one is modified to work with Pydroid 3 on android. Tested on a Galaxy S23 U
 
 ```bash
 python nonogram_kivy_alt_suggest_WIP.py
+```
+
+#### Sudoku
+
+![image](https://github.com/user-attachments/assets/be6eca25-1d6f-42b9-a0e5-8328d6647a27)
+
+```bash
+python sudoku.py
 ```
 
 These are works in progress, so you might encounter some bugs. Don’t hesitate to tweak the code, test it, and improve it.
