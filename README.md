@@ -61,7 +61,8 @@ python nonogram_kivy_alt_suggest_WIP.py
 
 #### Sudoku
 
-![image](https://github.com/user-attachments/assets/be6eca25-1d6f-42b9-a0e5-8328d6647a27)
+![image](https://github.com/user-attachments/assets/37ad9dac-231b-4a37-998e-832516e81085)
+
 
 ```bash
 python sudoku.py
